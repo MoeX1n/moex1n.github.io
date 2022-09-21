@@ -1,0 +1,210 @@
+<!doctype html>
+
+<html lang="zh-cmn-Hans">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" />
+    <meta name="renderer" content="webkit" />
+    <meta name="force-rendering" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdui@1.0.1/dist/css/mdui.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" referrerpolicy="no-referrer"
+    />
+    <title>WebProxy</title>
+    <link rel="icon" href="__sys__/assets/ico/favicon.png">
+    <base target="_blank">
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-size: 10pt;
+        }
+        
+        .content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 0;
+        }
+        
+        .footer {
+            padding: 20px;
+            text-align: center;
+            background: #ddd;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body class="mdui-theme-layout-auto">
+    <div class="content mdui-appbar-with-toolbar mdui-drawer-body-left">
+        <div class="mdui-appbar mdui-appbar-fixed">
+            <div class="mdui-toolbar mdui-color-theme">
+                <button class="mdui-btn" mdui-tooltip="{content: 'Shortcuts'}" mdui-drawer="{target: '#left-drawer'}"><i class=" mdui-icon material-icons">menu</i></button>
+                <span class="mdui-typo-title mdui-hidden-xs-down mdui-ripple">萌訫网翻</span>
+              
+
+
+            </div>
+        </div>
+
+        <div id="left-drawer" class="mdui-drawer mdui-drawer-close jss160" >
+        
+            <ul class="mdui-list">
+                <li class="mdui-list-item mdui-ripple">
+                    <a href="/https://www.google.com/" class="mdui-list-item-content">Google</a>
+                    <i class="mdui-list-item-icon mdui-icon fab fa-google"></i>
+                </li>
+                <li class="mdui-list-item mdui-ripple">
+                    <a href="/https://zh.wikipedia.org/wiki/Wikipedia:首页" class="mdui-list-item-content">Wikipedia</a>
+                    <i class="mdui-list-item-icon mdui-icon fab fa-wikipedia-w"></i>
+                </li>
+                <li class="mdui-list-item mdui-ripple">
+                    <a href="/https://www.youtube.com" class="mdui-list-item-content">Youtube</a>
+                    <i class="mdui-list-item-icon mdui-icon fab fa-youtube"></i>
+                </li>
+                <li class="mdui-list-item mdui-ripple">
+                    <a href="/https://github.com" class="mdui-list-item-content">Github</a>
+                    <i class="mdui-list-item-icon mdui-icon fab fa-github"></i>
+                </li>
+                <li class="mdui-list-item mdui-ripple">
+                    <a href="/https://www.facebook.com/Cloudflare/" class="mdui-list-item-content">Facebook</a>
+                    <i class="mdui-list-item-icon mdui-icon fab fa-facebook"></i>
+                </li>
+                <li class="mdui-list-item mdui-ripple">
+                    <a href="/https://www.reddit.com/" class="mdui-list-item-content">Reddit</a>
+                    <i class="mdui-list-item-icon mdui-icon fab fa-reddit"></i>
+                </li>
+            </ul>
+        </div>
+
+        <div class="mdui-row mdui-container mdui-center mdui-valign" style="flex-grow: 1;">
+
+            <div class="mdui-container">
+                <div class="mdui-container mdui-m-a-2 mdui-center">
+                    <div class="mdui-typo-display-3">
+                        <center>萌訫网翻</center>
+                    </div>
+                </div>
+                <div class="mdui-container mdui-m-a-2 mdui-valign">
+                    <div class="mdui-col-xs-10 mdui-container-fluid">
+                        <div class="mdui-textfield mdui-textfield-floating-label">
+                            <i class="mdui-icon material-icons">search</i>
+                            <label class="mdui-textfield-label">搜索或者是输入网址(o゜▽゜)o☆</label>
+                            <input id="txtURL" class="mdui-textfield-input" type="text" autofocus />
+                        </div>
+                    </div>
+                    <div class="mdui-col-xs-2 mdui-container-fluid mdui-center mdui-p-t-3 mdui-hidden-xs-down">
+                        <button id="btnGo" class="mdui-btn mdui-btn-block mdui-btn-raised mdui-ripple">Go</button>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <script>
+        const PAGE_CONF_SET = 110
+        const PAGE_CONF_GET = 111
+
+        const SW_CONF_RETURN = 112
+        const SW_CONF_CHANGE = 113
+
+        const PAGE_READY_CHECK = 200
+        const SW_READY = 201
+
+        const sw = navigator.serviceWorker
+
+
+        sw.addEventListener('message', onSwMsg)
+        sendMsgToSw(PAGE_READY_CHECK)
+
+        btnGo.onclick = function() {
+            const text = txtURL.value.trim()
+            if (text) {
+                const url = './-' + text
+                open(url, '_blank', 'noopener,noreferrer')
+            }
+        }
+        txtURL.onkeypress = function(e) {
+            if (e.keyCode === 13) {
+                btnGo.onclick()
+            }
+        }
+        txtURL.setSelectionRange(0, txtURL.value.length)
+
+
+        function onSwMsg(e) {
+            const [cmd, msg] = e.data
+
+            switch (cmd) {
+                case SW_CONF_RETURN:
+                    conf = msg
+                    showConf()
+                    break
+
+                case SW_CONF_CHANGE:
+                    conf = msg
+                    updateSelected()
+                    break
+
+                case SW_READY:
+                    sendMsgToSw(PAGE_CONF_GET)
+                    break
+            }
+        }
+
+        function onSwFail(err) {
+            txtURL.value = err
+        }
+
+        selNode.onchange = function() {
+            const item = this.options[this.selectedIndex]
+            const node = item.value
+            conf.node_default = node
+            sendMsgToSw(PAGE_CONF_SET, conf)
+        }
+
+        function sendMsgToSw(cmd, val) {
+            const ctl = sw.controller
+            if (!ctl) {
+                console.log('ctl is null')
+                return
+            }
+            ctl.postMessage([cmd, val])
+        }
+
+        function addNodeItem(id, text) {
+            const optEl = document.createElement('option')
+            optEl.id = '--' + id
+            optEl.text = text
+            optEl.value = id
+            selNode.appendChild(optEl)
+        }
+
+
+        function updateSelected() {
+            const id = conf.node_default
+            const item = document.getElementById('--' + id)
+            if (item) {
+                item.selected = true
+            } else {
+                console.warn('unknown node:', id)
+            }
+        }
+
+        function showConf() {
+            for (const [id, node] of Object.entries(conf.node_map)) {
+                if (!node.hidden) {
+                    addNodeItem(id, node.label)
+                }
+            }
+            updateSelected()
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mdui@1.0.1/dist/js/mdui.min.js "></script>
+</body>
+
+</html>
